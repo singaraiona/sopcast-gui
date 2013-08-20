@@ -6,11 +6,8 @@ import subprocess
 import time
 import string
 
-import gtk
+from gi.repository import Gtk
 import gobject
-import pygtk
-
-pygtk.require('2.0')
 
 class MPlayer:
     def __init__(self, path, draw, show_output=True):
@@ -50,15 +47,15 @@ class MPlayer:
 
 class MPlayerWrapper:
     def __init__(self):
-        self.window = gtk.Window(gtk.WINDOW_TOPLEVEL)
-        self.draw = gtk.DrawingArea()
+        self.window = Gtk.Window()
+        self.draw = Gtk.DrawingArea()
         self.mplayer = None
         self.setup_widgets()
 
     def setup_widgets(self):
-        self.window.connect("destroy", gtk.main_quit)
+        self.window.connect("destroy", Gtk.main_quit)
         self.window.connect("key_press_event", self.key_press_event)
-        self.draw.modify_bg(gtk.STATE_NORMAL, gtk.gdk.color_parse("black"))
+        #self.draw.modify_bg(Gtk.STATE_NORMAL, Gtk.gdk.color_parse("black"))
         self.draw.connect("configure_event", self.redraw)
         self.window.add(self.draw)
         self.window.show_all()
@@ -75,8 +72,8 @@ class MPlayerWrapper:
 
     def play(self, path):
         with MPlayer(path, self.draw, True) as self.mplayer:
-            gobject.child_watch_add(self.mplayer.pid, gtk.main_quit)
-            gtk.main()
+            #gobject.child_watch_add(self.mplayer.pid, Gtk.main_quit)
+            Gtk.main()
 
 if __name__ == "__main__":
     wrapper = MPlayerWrapper()
