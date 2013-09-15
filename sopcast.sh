@@ -26,17 +26,16 @@ cd ${SOPDIR}
 
 exec ./${SOPBIN} ${SOURCE} ${SOPPORT} ${LOCALPORT} > /dev/null &2>1 &
 
+sleep 5
+
 while true; do
-    if [ -z `pgrep zenity` ]; then    
-	exec zenity --progress --pulsate &
-    fi	
+
     if [ -z `pgrep ${SOPBIN}`]; then
 	pkill -9 ${PLAYERBIN}
-	pkill -9 zenity
 	zenity --error --text "Stream not found."
 	exit 1
     fi
-    pkill -9 zenity
+
     ${PLAYERBIN} ${PLAYERSOURCE}:${LOCALPORT} > /dev/null
 done
 
