@@ -1,0 +1,58 @@
+#!/bin/bash
+
+SPDIR=${HOME}/svmplayer
+SOPBIN=${SPDIR}/sp-sc-auth
+SOPPORT="3908"
+PLPORT="8908"
+URL=$1
+PIDFILE="/tmp/.sop.pid"
+MPLAYER="mplayer"
+SOPCAST="sp-sc-auth"
+MPLAYERLOG="/tmp/.mplayer.log"
+
+killbins() {
+	killall -s SIGKILL $MPLAYER >/dev/null 2>&1
+	killall -s SIGKILL $SOPCAST >/dev/null 2>&1
+}	
+
+run_mplayer() {
+	$MPLAYER http://localhost:$PLPORT >$MPLAYERLOG 2>&1
+}
+
+for pid in `cat $PIDFILE`; do
+	kill -9 $pid >/dev/null 2>&1
+done
+
+echo $$ > $PIDFILE
+killbins
+
+if [[ -z ${URL} ]]; then
+	zenity --error --text "Source url is not specified."
+	exit 1
+fi
+
+export LD_LIBRARY_PATH=${SPDIR}/lib
+${SOPBIN} ${URL} $SOPPORT $PLPORT >/dev/null 2>&1 &
+> $MPLAYERLOG
+zenity --info --title="Sopcast" --text="Starting sopcast..." >/dev/null 2>&1 &
+sleep 10
+killall -s SIGKILL zenity >/dev/null 2>&1
+
+run_mplayer
+
+while [[ `pgrep $SOPCAST` ]];
+do
+	if [[ -z `pgrep $MPLAYER` ]];
+	then		
+		if [[ `cat $MPLAYERLOG | grep "No stream found"` ]];
+		then
+			run_mplayer
+		else 
+			break
+		fi			
+	fi
+done
+
+killbins
+
+exit 0
