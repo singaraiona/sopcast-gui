@@ -54,5 +54,6 @@ do
 done
 
 killbins
+zenity --info --title="Sopcast" --text="Closed"
 
 exit 0
